@@ -45,12 +45,10 @@ public class FileSystem {
 
 
     public synchronized boolean writeFile(File f, byte[] data) {
-        if (currentDir.contains(f)) {
-            return container.allocateFile(f, data);
-        } else {
+        if (!currentDir.contains(f)) {
             currentDir.addFile(f);
-            return container.allocateFile(f, data);
         }
+        return container.allocateFile(f, data);
     }
 
     public synchronized boolean appendFile(File f, byte[] dataToAppend) {
