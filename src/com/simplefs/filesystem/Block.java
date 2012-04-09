@@ -4,8 +4,10 @@ import com.simplefs.file.File;
 
 public class Block {
     File file;
-    private int size;
     private boolean isFree;
+    // size of data stored in a file
+    private int size;
+    // start address of data in container storage
     private int startAddress;
 
     public File getFile() {

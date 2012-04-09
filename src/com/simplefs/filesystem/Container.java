@@ -28,6 +28,13 @@ public class Container {
     }
 
 
+    /**
+     * Find first block with enough space to allocate given data
+     *
+     * @param f
+     * @param data
+     * @return true, if an operation was successful, false otherwise
+     */
     public synchronized boolean allocateFile(File f, byte[] data) {
         for (Block b : blocks) {
             // Using first-fit strategy to allocate data in a block
@@ -48,6 +55,12 @@ public class Container {
         return false;
     }
 
+    /**
+     * Reads data from file
+     *
+     * @param f
+     * @return data stored in a file or null
+     */
     public byte[] readFile(File f) {
         for (Block b : blocks) {
             if (!b.isFree() && b.getFile().equals(f)) {
@@ -59,6 +72,12 @@ public class Container {
         return null;
     }
 
+    /**
+     * Deletes file from container and merges continuous blocks
+     *
+     * @param f
+     * @return
+     */
     public synchronized boolean deleteFile(File f) {
         for (Block b : blocks) {
             if (!b.isFree() && b.getFile().equals(f)) {

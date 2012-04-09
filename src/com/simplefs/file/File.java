@@ -44,6 +44,12 @@ public class File extends AbstractFile {
         return sb.toString();
     }
 
+    /**
+     * Two files are equal if they are located in the same directory and have identical names
+     *
+     * @param obj
+     * @return
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof File) {

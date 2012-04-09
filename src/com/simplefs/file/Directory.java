@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Directory extends AbstractFile {
+    // Directory contains a list of files stored in it
     List<AbstractFile> fileList = new ArrayList<AbstractFile>();
 
     public Directory() {
