@@ -18,11 +18,11 @@ public class File extends AbstractFile {
         this.path = path;
     }
 
-    public void setName(String name) {
+    public synchronized void setName(String name) {
         this.name = name;
     }
 
-    public String getName() {
+    public synchronized String getName() {
         return name;
     }
 

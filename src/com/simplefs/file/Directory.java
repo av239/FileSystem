@@ -22,19 +22,19 @@ public class Directory extends AbstractFile {
         this.name = name;
     }
 
-    public String getPath() {
+    public synchronized String getPath() {
         return path;
     }
 
-    public String getName() {
+    public synchronized String getName() {
         return name;
     }
 
-    public List<AbstractFile> getFileList() {
+    public synchronized List<AbstractFile> getFileList() {
         return fileList;
     }
 
-    public boolean addFile(AbstractFile f) {
+    public synchronized boolean addFile(AbstractFile f) {
         if (fileList.contains(f)) {
             return false;
         }
@@ -42,11 +42,11 @@ public class Directory extends AbstractFile {
         return true;
     }
 
-    public boolean removeFile(AbstractFile f) {
+    public synchronized boolean removeFile(AbstractFile f) {
         return fileList.remove(f);
     }
 
-    public boolean contains(AbstractFile f) {
+    public synchronized boolean contains(AbstractFile f) {
         return fileList.contains(f);
     }
 

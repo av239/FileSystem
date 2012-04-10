@@ -10,7 +10,7 @@ public class Block {
     // start address of data in container storage
     private int startAddress;
 
-    public File getFile() {
+    public synchronized File getFile() {
         if (file != null) {
             return file;
         }
@@ -18,21 +18,20 @@ public class Block {
         return dummy;
     }
 
-    public void setFile(File file) {
+    public synchronized void setFile(File file) {
         this.file = file;
         this.isFree = false;
     }
 
-    public int getStartAddress() {
+    public synchronized int getStartAddress() {
         return startAddress;
     }
 
-    public void setStartAddress(int startAddress) {
+    public synchronized void setStartAddress(int startAddress) {
         this.startAddress = startAddress;
     }
 
-    public void setSize(int size) {
-
+    public synchronized void setSize(int size) {
         this.size = size;
     }
 
@@ -49,12 +48,12 @@ public class Block {
         return sb.toString();
     }
 
-    public void setFree(boolean free) {
+    public synchronized void setFree(boolean free) {
         isFree = free;
     }
 
 
-    public int getSize() {
+    public synchronized int getSize() {
         return size;
     }
 
@@ -72,17 +71,17 @@ public class Block {
         isFree = false;
     }
 
-    public int getFinishAddress() {
+    public synchronized int getFinishAddress() {
         return startAddress + size - 1;
     }
 
-    public boolean erase() {
+    public synchronized boolean erase() {
         isFree = true;
         file = null;
         return true;
     }
 
-    public boolean isFree() {
+    public synchronized boolean isFree() {
         return isFree;
     }
 }
