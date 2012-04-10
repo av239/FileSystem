@@ -110,7 +110,7 @@ public class FileSystem {
      * @param f
      * @return byte array if read was successful, null otherwise
      */
-    public byte[] readFile(File f) {
+    public synchronized byte[] readFile(File f) {
         if (currentDir.contains(f)) {
             return container.readFile(f);
         }

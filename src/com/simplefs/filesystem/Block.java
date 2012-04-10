@@ -18,7 +18,7 @@ public class Block {
         return dummy;
     }
 
-    public synchronized void setFile(File file) {
+    public void setFile(File file) {
         this.file = file;
         this.isFree = false;
     }
@@ -27,11 +27,11 @@ public class Block {
         return startAddress;
     }
 
-    public synchronized void setStartAddress(int startAddress) {
+    public void setStartAddress(int startAddress) {
         this.startAddress = startAddress;
     }
 
-    public synchronized void setSize(int size) {
+    public void setSize(int size) {
 
         this.size = size;
     }
@@ -49,7 +49,7 @@ public class Block {
         return sb.toString();
     }
 
-    public synchronized void setFree(boolean free) {
+    public void setFree(boolean free) {
         isFree = free;
     }
 
@@ -76,7 +76,7 @@ public class Block {
         return startAddress + size - 1;
     }
 
-    public synchronized boolean erase() {
+    public boolean erase() {
         isFree = true;
         file = null;
         return true;

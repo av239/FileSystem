@@ -18,7 +18,7 @@ public class Container {
         return blocks.size();
     }
 
-    public int getFileSize(File f) {
+    public synchronized int getFileSize(File f) {
         for (Block b : blocks) {
             if (b.getFile().equals(f)) {
                 return b.getSize();
@@ -35,16 +35,17 @@ public class Container {
      * @param data
      * @return true, if an operation was successful, false otherwise
      */
-    public synchronized boolean allocateFile(File f, byte[] data) {
+    public boolean allocateFile(File f, byte[] data) {
         for (Block b : blocks) {
             // Using first-fit strategy to allocate data in a block
             if (b.isFree() && b.getSize() >= data.length) {
                 // if a block can be split into 2 blocks
                 if (b.getSize() > data.length) {
-                    Block newBlock = new Block(b.getSize() - data.length);
-                    newBlock.setStartAddress(b.getStartAddress() + data.length);
-                    blocks.add(newBlock);
-
+                    synchronized (this) {
+                        Block newBlock = new Block(b.getSize() - data.length);
+                        newBlock.setStartAddress(b.getStartAddress() + data.length);
+                        blocks.add(newBlock);
+                    }
                 }
                 b.setFile(f);
                 b.setSize(data.length);
@@ -61,7 +62,7 @@ public class Container {
      * @param f
      * @return data stored in a file or null
      */
-    public byte[] readFile(File f) {
+    public synchronized byte[] readFile(File f) {
         for (Block b : blocks) {
             if (!b.isFree() && b.getFile().equals(f)) {
                 byte[] tmp = new byte[b.getSize()];
@@ -79,23 +80,26 @@ public class Container {
      * @return
      */
     public synchronized boolean deleteFile(File f) {
+        int index = 0;
         for (Block b : blocks) {
             if (!b.isFree() && b.getFile().equals(f)) {
                 b.erase();
                 for (int i = b.getStartAddress(); i <= b.getFinishAddress(); i++) {
                     storage[i] = 0;
                 }
+                mergeFreeBlocks(index);
+                return true;
             }
+            index++;
         }
-        mergeFreeBlocks();
-        return true;
+        return false;
     }
 
     /**
      * merges contiguous free blocks into one big block
      */
-    public synchronized void mergeFreeBlocks() {
-        for (int i = 0; i < blocks.size() - 1; i++) {
+    public synchronized void mergeFreeBlocks(int startIndex) {
+        /*for (int i = 0; i < blocks.size() - 1; i++) {
             if (blocks.get(i).isFree() && blocks.get(i + 1).isFree()) {
                 int newSize = blocks.get(i).getSize() + blocks.get(i + 1).getSize();
                 Block newBlock = new Block(newSize);
@@ -105,7 +109,25 @@ public class Container {
                 blocks.remove(i);
                 blocks.add(newBlock);
             }
+        }*/
+        int index = startIndex;
+        while (index > 0 && blocks.get(index - 1).isFree()) {
+            index--;
         }
+        for (int i = index; i < blocks.size() - 1; i++) {
+            if (blocks.get(i).isFree() && blocks.get(i + 1).isFree()) {
+                int newSize = blocks.get(i).getSize() + blocks.get(i + 1).getSize();
+                Block newBlock = new Block(newSize);
+                newBlock.setStartAddress(blocks.get(i).getStartAddress());
+
+                blocks.remove(i);
+                blocks.remove(i);
+                blocks.add(newBlock);
+            } else {
+                return;
+            }
+        }
+
     }
 
     @Override
