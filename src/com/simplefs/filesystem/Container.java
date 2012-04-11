@@ -11,6 +11,12 @@ import java.util.List;
 public class Container {
     private List<Block> blocks = new ArrayList<Block>();
     public static int MAX_SIZE_AVAILABLE = 1000;
+
+    private double loadFactor = 0.0;
+    // if a loadFactor is lower then threshold, compact the file
+    private double threshold = 0.5;
+    private int bytesStored = 0;
+
     //private byte[] storage = new byte[MAX_SIZE_AVAILABLE];
 
     RandomAccessFile container;
@@ -81,6 +87,10 @@ public class Container {
                     container.seek(offset);
                     container.write(data);
 
+                    bytesStored += len;
+                    loadFactor = bytesStored / container.length();
+                    System.out.println("load factor:" + loadFactor);
+
                     return true;
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -100,6 +110,9 @@ public class Container {
 
         try {
             container.write(data);
+            bytesStored += len;
+            loadFactor = (double) bytesStored / container.length();
+            //System.out.println("load factor:" + loadFactor);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -143,7 +156,18 @@ public class Container {
         for (Block b : blocks) {
             if (!b.isFree() && b.getFile().equals(f)) {
                 b.erase();
-                //mergeFreeBlocks(index);
+                bytesStored -= b.getLength();
+                try {
+                    loadFactor = (double) bytesStored / container.length();
+                    //System.out.println("load factor in delete:" + loadFactor);
+
+                    if (loadFactor < threshold) {
+                        compact();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                mergeFreeBlocks(index);
                 return true;
             }
             index++;
@@ -178,12 +202,35 @@ public class Container {
                 Block newBlock = new Block(newSize);
                 newBlock.setOffset(blocks.get(i).getOffset());
 
-                blocks.remove(i);
-                blocks.remove(i);
-                blocks.add(newBlock);
+                blocks.set(i, newBlock);
+                blocks.remove(i + 1);
             } else {
                 return;
             }
+        }
+
+    }
+
+    public void compact() {
+        byte copy[] = new byte[bytesStored];
+        int position = 0;
+
+        for (Block b : blocks) {
+            if (!b.isFree()) {
+                byte data[] = readFile(b.getFile());
+                System.arraycopy(data, 0, copy, position, data.length);
+                b.setOffset(position);
+                position += data.length;
+            }
+        }
+
+        try {
+            container.setLength(0);
+            container.write(copy);
+            loadFactor = 1.0;
+            System.out.println("compact was called");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }

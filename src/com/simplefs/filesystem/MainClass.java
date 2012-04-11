@@ -49,15 +49,15 @@ public class MainClass {
         fileList.add(file);
     }
 
-    public static void writeFilesFromDir(Container c, String directory) {
-        File dir = new File(directory);
-        System.out.println(dir.isDirectory());
-        File[] children = dir.listFiles();
+    public static void writeFilesFromDir(Container c, File directory) {
+        File[] children = directory.listFiles();
 
         for (File f : children) {
             if (f.isFile()) {
                 System.out.println(f.getName());
                 writeFileContents(c, f);
+            } else {
+                writeFilesFromDir(c, f);
             }
         }
     }
@@ -65,33 +65,36 @@ public class MainClass {
     public static void main(String[] args) {
         Container c = new Container();
 
-        writeFilesFromDir(c, ".idea");
+        File ideaDir = new File(".idea");
+        writeFilesFromDir(c, ideaDir);
 
-        for (int i = 0; i < fileList.size(); i++) {
-            if (i % 2 == 0) {
-                c.deleteFile(fileList.get(i));
-            }
+        int numFilesToDelete = fileList.size() - 1;
+        for (int i = 0; i < numFilesToDelete; i++) {
+            c.deleteFile(fileList.get(i));
+        }
+
+        if (c.getNumBlocks() != (fileList.size() - numFilesToDelete) + 1) {
+            throw new RuntimeException("Error in merge free blocks!");
         }
 
         //writeFilesFromDir(c, "testdir");
 
-        for (int i = 0; i < fileList.size(); i++) {
-            if (i % 2 == 1) {
-                byte dataRead[] = c.readFile(fileList.get(i));
+        for (int i = 0; i < numFilesToDelete; i++) {
+            byte dataRead[] = c.readFile(fileList.get(i));
 
-                byte expectedData[] = getFileContent(".idea", fileList.get(i).getName());
+            if (dataRead != null) {
+                throw new RuntimeException("ERROR in deleting file!");
+            }
+        }
 
-                for (int j = 0; j < dataRead.length; j++) {
-                    if (expectedData != null && dataRead[j] != expectedData[j]) {
-                        throw new RuntimeException("ERROR!");
-                    }
-                }
-            } else {
-                byte dataRead[] = c.readFile(fileList.get(i));
+        for (int i = numFilesToDelete; i < fileList.size(); i++) {
+            byte dataRead[] = c.readFile(fileList.get(i));
 
-                // dataRead should be null for deleted files
-                if (dataRead != null) {
-                    throw new RuntimeException("ERROR");
+            byte expectedData[] = getFileContent(".idea", fileList.get(i).getName());
+
+            for (int j = 0; j < dataRead.length; j++) {
+                if (expectedData != null && dataRead[j] != expectedData[j]) {
+                    throw new RuntimeException("ERROR in reading file!");
                 }
             }
         }
