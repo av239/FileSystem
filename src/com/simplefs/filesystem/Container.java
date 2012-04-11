@@ -89,7 +89,7 @@ public class Container {
 
                     bytesStored += len;
                     loadFactor = bytesStored / container.length();
-                    System.out.println("load factor:" + loadFactor);
+                    //System.out.println("load factor:" + loadFactor);
 
                     return true;
                 } catch (IOException e) {
@@ -221,6 +221,13 @@ public class Container {
                 System.arraycopy(data, 0, copy, position, data.length);
                 b.setOffset(position);
                 position += data.length;
+            }
+        }
+
+        for (int i = 0; i < blocks.size(); i++) {
+            if (blocks.get(i).isFree()) {
+                blocks.remove(i);
+                i--;
             }
         }
 

@@ -73,11 +73,18 @@ public class MainClass {
             c.deleteFile(fileList.get(i));
         }
 
-        if (c.getNumBlocks() != (fileList.size() - numFilesToDelete) + 1) {
+        // the number of blocks depends on compact operation,
+        // which is unknown to happen
+        if (c.getNumBlocks() == (fileList.size() - numFilesToDelete) + 1 ||
+                c.getNumBlocks() == (fileList.size() - numFilesToDelete)) {
+            // if compact occured, no free blocks should be in a container
+            // if compact did not occur, one free block must be in a container
+        } else {
             throw new RuntimeException("Error in merge free blocks!");
         }
 
-        //writeFilesFromDir(c, "testdir");
+        /*File testDir = new File("testdir");
+        writeFilesFromDir(c, testDir);*/
 
         for (int i = 0; i < numFilesToDelete; i++) {
             byte dataRead[] = c.readFile(fileList.get(i));
@@ -94,9 +101,12 @@ public class MainClass {
 
             for (int j = 0; j < dataRead.length; j++) {
                 if (expectedData != null && dataRead[j] != expectedData[j]) {
+                    System.out.println(j);
                     throw new RuntimeException("ERROR in reading file!");
                 }
             }
+
+            //System.out.println("READ FILE:" + fileList.get(i).getName());
         }
 
         c.close();
