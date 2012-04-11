@@ -86,6 +86,13 @@ public class MainClass {
                         throw new RuntimeException("ERROR!");
                     }
                 }
+            } else {
+                byte dataRead[] = c.readFile(fileList.get(i));
+
+                // dataRead should be null for deleted files
+                if (dataRead != null) {
+                    throw new RuntimeException("ERROR");
+                }
             }
         }
 
