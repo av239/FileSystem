@@ -63,14 +63,7 @@ public class MainClass {
     }
 
     public static void main(String[] args) {
-        File dir = new File(".idea");
-        System.out.println(dir.isDirectory());
-        Container c = null;
-        try {
-            c = new Container();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Container c = new Container();
 
         writeFilesFromDir(c, ".idea");
 

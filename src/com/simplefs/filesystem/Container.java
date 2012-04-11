@@ -15,7 +15,7 @@ public class Container {
 
     RandomAccessFile container;
 
-    Container() throws FileNotFoundException {
+    Container() {
         String containerFile = "container.bin";
         java.io.File f = new java.io.File(containerFile);
         if (!f.exists()) {
@@ -33,7 +33,11 @@ public class Container {
             }
         }
 
-        container = new RandomAccessFile(containerFile, "rw");
+        try {
+            container = new RandomAccessFile(containerFile, "rw");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public int getNumBlocks() {
