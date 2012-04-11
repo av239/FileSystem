@@ -3,44 +3,43 @@ package com.simplefs.filesystem;
 import com.simplefs.file.File;
 
 public class Block {
+    public void setFile(File file) {
+        this.file = file;
+        this.isFree = false;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
     File file;
     private boolean isFree;
-    // size of data stored in a file
-    private int size;
+    // length of data stored in a file
+    private int length;
     // start address of data in container storage
-    private int startAddress;
+    private int offset;
 
     public synchronized File getFile() {
         if (file != null) {
             return file;
         }
-        File dummy = new File("");
-        return dummy;
+        return new File("");
     }
 
-    public synchronized void setFile(File file) {
-        this.file = file;
-        this.isFree = false;
+    public synchronized int getOffset() {
+        return offset;
     }
 
-    public synchronized int getStartAddress() {
-        return startAddress;
-    }
-
-    public synchronized void setStartAddress(int startAddress) {
-        this.startAddress = startAddress;
-    }
-
-    public synchronized void setSize(int size) {
-        this.size = size;
+    public synchronized void setOffset(int offset) {
+        this.offset = offset;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("IsFree: ").append(isFree);
-        sb.append(" Start address: ").append(startAddress);
-        sb.append(" Size: ").append(size);
+        sb.append(" Start address: ").append(offset);
+        sb.append(" Size: ").append(length);
         if (file != null) {
             sb.append("File: ").append(file);
         }
@@ -48,31 +47,26 @@ public class Block {
         return sb.toString();
     }
 
-    public synchronized void setFree(boolean free) {
-        isFree = free;
+    public synchronized int getLength() {
+        return length;
     }
 
 
-    public synchronized int getSize() {
-        return size;
-    }
-
-
-    Block(int size) {
+    Block(int length) {
         isFree = true;
-        startAddress = 0;
-        this.size = size;
+        offset = 0;
+        this.length = length;
     }
 
-    Block(File f, int start, int size) {
+    Block(File f, int start, int length) {
         file = f;
-        startAddress = start;
-        this.size = size;
+        offset = start;
+        this.length = length;
         isFree = false;
     }
 
     public synchronized int getFinishAddress() {
-        return startAddress + size - 1;
+        return offset + length - 1;
     }
 
     public synchronized boolean erase() {

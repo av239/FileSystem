@@ -1,66 +1,101 @@
 package com.simplefs.filesystem;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainClass {
+    private static List<com.simplefs.file.File> fileList = new ArrayList<com.simplefs.file.File>();
+
+    public static byte[] getFileContent(File f) {
+        FileInputStream fins;
+        byte data[] = null;
+
+        try {
+            fins = new FileInputStream(f);
+            DataInputStream input = new DataInputStream(new BufferedInputStream(fins));
+
+            data = new byte[(int) f.length()];
+            input.read(data);
+            fins.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    public static byte[] getFileContent(String directory, String filename) {
+        File dir = new File(directory);
+        File[] children = dir.listFiles();
+
+        for (File f : children) {
+            if (f.isFile()) {
+                if (f.getName().equals(filename)) {
+                    return getFileContent(f);
+                }
+            }
+        }
+        return null;
+    }
+
+    public static void writeFileContents(Container c, File f) {
+        byte data[] = getFileContent(f);
+        com.simplefs.file.File file = new com.simplefs.file.File(f.getName());
+
+        c.allocateFile(file, data);
+
+        fileList.add(file);
+    }
+
+    public static void writeFilesFromDir(Container c, String directory) {
+        File dir = new File(directory);
+        System.out.println(dir.isDirectory());
+        File[] children = dir.listFiles();
+
+        for (File f : children) {
+            if (f.isFile()) {
+                System.out.println(f.getName());
+                writeFileContents(c, f);
+            }
+        }
+    }
+
     public static void main(String[] args) {
-        /*FileSystem fs = new FileSystem();
-        fs.createFile("a");
-        fs.createFile("b");
-        Directory dir1 = new Directory("dir");
-        //fs.createDirectory("dir");
-        fs.createDirectory(dir1);
-        System.out.println(fs);
-        fs.changeDir(dir1);
-        fs.createDirectory("newdir");
-        Directory dir2 = new Directory("dir2");
-        fs.createDirectory(dir2);
-        fs.changeDir(dir2);
-        fs.createFile("file1");
-        fs.createFile("file2");
-
-        File fileToWrite = new File("tmp");
-        byte data[] = new byte[10];
-        data[0] = 100;
-        data[data.length - 1] = 99;
-        fs.createFile(fileToWrite);
-        fs.writeFile(fileToWrite, data);
-        byte dataRead[] = new byte[10];
-        dataRead = fs.readFile(fileToWrite);
-        System.out.println(fs);
-        for (int i = 0; i < dataRead.length; i++) {
-            System.out.println(dataRead[i]);
+        File dir = new File(".idea");
+        System.out.println(dir.isDirectory());
+        Container c = null;
+        try {
+            c = new Container();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-        fs.deleteFile(fileToWrite);
-        System.out.println(fs);*/
 
+        writeFilesFromDir(c, ".idea");
 
-        /*Container c = new Container();
-        File f = new File("a");
-        byte[] data = new byte[] {1,2,3};
-        c.allocateFile(f, data);
-        System.out.println(c);
-        File f1 = new File("b");
-        data[2] = (byte) 100;
-        c.allocateFile(f1, data);
-        System.out.println(c);
-        
-        byte[] tmp = new byte[3];
-        tmp = c.readFile(f1);
-        for (int i = 0; i < tmp.length; i++){
-            System.out.println(tmp[i]);
+        for (int i = 0; i < fileList.size(); i++) {
+            if (i % 2 == 0) {
+                c.deleteFile(fileList.get(i));
+            }
         }
-        
-        c.deleteFile(f1);
-        System.out.println(c);*/
 
+        //writeFilesFromDir(c, "testdir");
 
-        /*fs.write(f, data);
-        byte[] res = new byte[3];
-        for (byte b : data){
-            System.out.println(b);
+        for (int i = 0; i < fileList.size(); i++) {
+            if (i % 2 == 1) {
+                byte dataRead[] = c.readFile(fileList.get(i));
+
+                byte expectedData[] = getFileContent(".idea", fileList.get(i).getName());
+
+                for (int j = 0; j < dataRead.length; j++) {
+                    if (expectedData != null && dataRead[j] != expectedData[j]) {
+                        throw new RuntimeException("ERROR!");
+                    }
+                }
+            }
         }
-        res = fs.read(f);
-        for (byte b : res){
-            System.out.println(b);
-        }*/
+
+        c.close();
     }
 }
